@@ -4,27 +4,40 @@ import { useActionState, useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { loginAction } from "../_authActions/authActions";
+import { loginAction, type LoginState } from "../_authActions/authActions";
 import { toast } from "sonner";
 
 
 const LoginForm = () => {
     // action trigger korle loginAction call hobe, loginAction er result ta state e set hobe
-  const [state, action, pending] = useActionState(loginAction, false);
+  const initialState: LoginState = {
+    message: "",
+    data: {
+      user: {
+        id: "",
+        name: "",
+        email: "",
+        phone: "",
+        avatar: "",
+        role: "TENANT",
+        status: "ACTIVE",
+        createdAt: "",
+        updatedAt: "",
+      },
+      accessToken: "",
+    },
+  };
+  const [state, action, pending] = useActionState(loginAction, initialState);
 
-  useEffect(() => { 
-    if (!state) return
-    
+  useEffect(() => {
+    if (!state?.message) return;
 
     if (state.data) {
-      toast.success(state.message || "Login Successful")
-    } else { 
-      toast.error(state.message ||"Login Failed!")
+      toast.success(state.message || "Login Successful");
+    } else {
+      toast.error(state.message || "Login Failed!");
     }
-
-   
-
-  },[state])
+  }, [state]);
 
   const [showPassword, setShowPassword] = useState(false);
 

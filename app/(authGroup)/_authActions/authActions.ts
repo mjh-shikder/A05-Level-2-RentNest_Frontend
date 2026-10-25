@@ -1,5 +1,7 @@
 "use server";
 
+import { cookies } from "next/headers";
+
 export type LoginState = {
   message: string;
   data: {
@@ -37,11 +39,22 @@ export const loginAction = async (prevState: LoginState, formData: FormData) => 
             body: JSON.stringify(payload)
         })
 
-    const result = await res.json()
+    const result: LoginState = await res.json()
 
-    console.log(result, "RESult");
+    if (result.data) { 
+        const cookieStore = await cookies() 
 
-//? sample output of result 
+        cookieStore.set("accessToken", result.data.accessToken, {
+            httpOnly: true,
+            maxAge: 60 * 60 * 24,
+            sameSite: "lax"
+        })
+
+    }
+
+    // console.log(result, "RESult");
+
+//? sample output of result
 //     {
 //   message: 'user logged in successfully',
 //   data: {
@@ -58,7 +71,9 @@ export const loginAction = async (prevState: LoginState, formData: FormData) => 
 //     },
 //     accessToken: ''
 //   }
-    
+
+
+
 
     return result
     
