@@ -1,12 +1,13 @@
-import LoginForm from "@/components/auth/LoginForm";
+
+import LoginForm from "@/app/(authGroup)/_authComponents/LoginForm";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import React from "react";
 
 const LoginPage = () => {
   return (
-  <div className="fixed inset-0 w-dvw h-dvh flex flex-col items-center justify-center bg-[url('/login-bg.jpg')] bg-cover bg-center bg-no-repeat">
-  <div className="w-full max-w-md space-y-6 rounded-lg border border-white/30 bg-white/10 p-8 shadow-lg backdrop-blur-xl">
+  <div className="fixed inset-0 w-dvw h-dvh flex flex-col items-center justify-center bg-[url('/login-bg.jpg')] bg-cover bg-center bg-no-repeat p-4">
+  <div className="w-full max-w-md space-y-6 rounded-lg border border-white/30 bg-white/10 p-8 shadow-lg backdrop-blur-xl ">
     {/* Form centric texts */}
     <div className="space-y-2 text-center">
       <h1 className="text-3xl font-bold">Welcome Back!</h1>
