@@ -49,8 +49,26 @@ export const loginAction = async (prevState: LoginState, formData: FormData) => 
         cookieStore.set("accessToken", result.data.accessToken, {
             httpOnly: true,
             maxAge: 60 * 60 * 24,
-            sameSite: "lax"
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production",
+            path: "/",
         })
+
+        cookieStore.set(
+            "userInfo",
+            JSON.stringify({
+                name: result.data.user.name,
+                role: result.data.user.role,
+                avatar: result.data.user.avatar,
+            }),
+            {
+                httpOnly: true,
+                maxAge: 60 * 60 * 24,
+                sameSite: "lax",
+                secure: process.env.NODE_ENV === "production",
+                path: "/",
+            },
+        )
 
         redirect('/')
 
@@ -83,6 +101,13 @@ export const loginAction = async (prevState: LoginState, formData: FormData) => 
     
     
 };
+
+export const logoutAction = async () => {
+    const cookieStore = await cookies()
+    cookieStore.delete("accessToken")
+    cookieStore.delete("userInfo")
+    redirect("/login")
+}
 
 
 export type RegisterState = {
