@@ -18,7 +18,7 @@ const RegisterForm = () => {
     if (state.success) {
       toast.success(state.message);
     } else {
-      toast.error(state.message);
+      toast.error(state.error || state.message);
     }
   }, [state]);
 
@@ -139,6 +139,11 @@ const RegisterForm = () => {
       <Button type="submit" className="w-full">
         {pending ? "Creating account..." : "Create Account"}
       </Button>
+      {state.error && (
+        <p role="alert" className="text-sm font-medium text-center text-red-800">
+          {state.error}
+        </p>
+      )}
     </form>
   );
 };

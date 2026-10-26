@@ -35,7 +35,7 @@ const LoginForm = () => {
     if (state.data) {
       toast.success(state.message || "Login Successful");
     } else {
-      toast.error(state.message || "Login Failed!");
+      toast.error(state.error || state.message || "Login Failed!");
     }
   }, [state]);
 
@@ -92,6 +92,11 @@ const LoginForm = () => {
         pending ? "Submittion..." : "Login"
        }
       </Button>
+      {state.error && (
+        <p role="alert" className="text-sm font-medium text-center text-red-800">
+          {state.error}
+        </p>
+      )}
     </form>
   );
 };

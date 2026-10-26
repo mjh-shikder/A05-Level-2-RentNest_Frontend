@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 
 export type LoginState = {
   message: string;
-  data: {
+  error?: string;
+  data?: {
     user: {
       id: string;
       name: string;
@@ -24,82 +25,101 @@ export type LoginState = {
 
 
 //* Login Function
-export const loginAction = async (prevState: LoginState, formData: FormData) => {
+export const loginAction = async (_prevState: LoginState, formData: FormData,): Promise<LoginState> => {
 
-    const email = formData.get("email")
-    const password = formData.get("password")
+  const email = formData.get("email");
 
-    const payload = {email, password}
+  const password = formData.get("password");
 
+  if (
+    typeof email !== "string" ||
+    !email.trim() ||
+    typeof password !== "string" ||
+    !password
+  ) {
 
-    const res = await fetch(`${process.env.BACKEND_URL}/api/auth/login`, 
-        {
-            method: "POST",
-            headers: {
-                "Content-Type" : "application/json"
-            },
-            body: JSON.stringify(payload)
-        })
+    return {
+      message: "Please enter your email and password.",
+      error: "Please enter your email and password.",
+    };
+  }
 
-    const result: LoginState = await res.json()
-
-    if (result.data) { 
-        const cookieStore = await cookies() 
-
-        cookieStore.set("accessToken", result.data.accessToken, {
-            httpOnly: true,
-            maxAge: 60 * 60 * 24,
-            sameSite: "lax",
-            secure: process.env.NODE_ENV === "production",
-            path: "/",
-        })
-
-        cookieStore.set(
-            "userInfo",
-            JSON.stringify({
-                name: result.data.user.name,
-                role: result.data.user.role,
-                avatar: result.data.user.avatar,
-            }),
-            {
-                httpOnly: true,
-                maxAge: 60 * 60 * 24,
-                sameSite: "lax",
-                secure: process.env.NODE_ENV === "production",
-                path: "/",
-            },
-        )
-
-        redirect('/')
-
-    }
-
-    // console.log(result, "RESult");
-
-//? sample output of result
-//     {
-//   message: 'user logged in successfully',
-//   data: {
-//     user: {
-//       id: 'dd01d503-7934-4a91-b95a-59e69c0fcfa1',
-//       name: 'Mr TENANT ',
-//       email: 'tenant@yz.com',
-//       phone: '01912345678',
-//       avatar: 'www.google.com',
-//       role: 'TENANT',
-//       status: 'ACTIVE',
-//       createdAt: '2026-10-08T09:42:43.893Z',
-//       updatedAt: '2026-10-08T09:42:43.893Z'
-//     },
-//     accessToken: ''
-//   }
+  const backendUrl = process.env.BACKEND_URL?.replace(/\/+$/, "");
 
 
-
-
-    return result
+  if (!backendUrl) {
     
-    
+    return {
+      message: "The server API URL is not configured.",
+      error: "The server API URL is not configured.",
+    };
+  }
+
+  let response: Response;
+  let result: {
+    message?: unknown;
+    error?: unknown;
+    data?: LoginState["data"];
+  } | null;
+
+  try {
+    response = await fetch(`${backendUrl}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim(), password }),
+      cache: "no-store",
+    });
+
+    result = await response.json().catch(() => null);
+  } catch {
+    return {
+      message: "Could not connect to the server. Please try again.",
+      error: "Could not connect to the server. Please try again.",
+    };
+  }
+
+  const apiError =
+    typeof result?.error === "string" && result.error.trim()
+      ? result.error
+      : typeof result?.message === "string" && result.message.trim()
+        ? result.message
+        : "Invalid Email or Password";
+
+  if (!response.ok || !result?.data?.user || !result.data.accessToken) {
+    return {
+      message: typeof result?.message === "string" ? result.message : apiError,
+      error: apiError,
+    };
+  }
+
+  const userData = result.data;
+  const cookieStore = await cookies();
+
+  cookieStore.set("accessToken", userData.accessToken, {
+    httpOnly: true,
+    maxAge: 60 * 60 * 24,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
+
+  cookieStore.set(
+    "userInfo",
+    JSON.stringify({
+      name: userData.user.name,
+      role: userData.user.role,
+      avatar: userData.user.avatar,
+    }),
+    {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    },
+  );
+
+  redirect("/");
 };
 
 export const logoutAction = async () => {
@@ -113,13 +133,14 @@ export const logoutAction = async () => {
 export type RegisterState = {
   message: string;
   success: boolean;
+  error?: string;
 };
 
-const getResponseMessage = (body: unknown) => {
-  if (typeof body === "object" && body !== null && "message" in body) {
-    const { message } = body;
-    if (typeof message === "string" && message.trim()) return message;
-    if (Array.isArray(message)) return message.join(" ");
+const getResponseText = (body: unknown, field: "message" | "error") => {
+  if (typeof body === "object" && body !== null && field in body) {
+    const value = (body as Record<string, unknown>)[field];
+    if (typeof value === "string" && value.trim()) return value;
+    if (Array.isArray(value)) return value.join(" ");
   }
 
   return undefined;
@@ -145,7 +166,8 @@ export const registerAction = async (
     !password ||
     (role !== "TENANT" && role !== "LANDLORD")
   ) {
-    return { message: "Please complete all required fields.", success: false };
+    const error = "Please complete all required fields.";
+    return { message: error, error, success: false };
   }
 
   const payload = {
@@ -160,7 +182,8 @@ export const registerAction = async (
 
   const backendUrl = process.env.BACKEND_URL?.replace(/\/+$/, "");
   if (!backendUrl) {
-    return { message: "The server API URL is not configured.", success: false };
+    const error = "The server API URL is not configured.";
+    return { message: error, error, success: false };
   }
 
   try {
@@ -175,13 +198,17 @@ export const registerAction = async (
     );
 
     const result: unknown = await response.json().catch(() => null);
-    const responseMessage = getResponseMessage(result);
+    const responseMessage = getResponseText(result, "message");
+    const responseError = getResponseText(result, "error");
 
     if (!response.ok) {
+      const error =
+        responseError ||
+        responseMessage ||
+        `Registration failed (${response.status}). Please try again.`;
       return {
-        message:
-          responseMessage ||
-          `Registration failed (${response.status}). Please try again.`,
+        message: responseMessage || error,
+        error,
         success: false,
       };
     }
@@ -191,8 +218,10 @@ export const registerAction = async (
       success: true,
       };
   } catch {
+    const error = "Could not connect to the server. Please try again.";
     return {
-      message: "Could not connect to the server. Please try again.",
+      message: error,
+      error,
       success: false,
     };
   }

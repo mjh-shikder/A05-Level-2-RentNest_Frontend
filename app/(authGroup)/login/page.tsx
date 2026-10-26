@@ -16,7 +16,7 @@ const LoginPage = () => {
       </p>
     </div>
     {/* Form */}
-    <LoginForm />
+        <LoginForm />
     <p className="text-center text-sm text-muted">
       Don&apos;t have an account?{" "}
       <Button asChild variant="link" className="h-auto p-0">
