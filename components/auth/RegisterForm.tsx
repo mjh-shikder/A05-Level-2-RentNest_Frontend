@@ -4,7 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { registerAction, type RegisterState } from "../_authActions/authActions";
+import { registerAction, type RegisterState } from "../../app/(authGroup)/_authActions/authActions";
 import { toast } from "sonner";
 
 const RegisterForm = () => {

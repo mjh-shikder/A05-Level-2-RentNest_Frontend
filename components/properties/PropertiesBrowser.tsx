@@ -233,7 +233,7 @@ const PropertiesBrowser = ({properties,}: {properties: PropertyListing[];}) => {
                 className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                 aria-label={`View ${property.title}`}
               >
-                <div className="relative aspect-[4/3] overflow-hidden bg-muted/50">
+                <div className="relative aspect-4/3 overflow-hidden bg-muted/50">
                   <Image
                     src={property.images[0] || "/register-bg.jpg"}
                     alt={property.title}

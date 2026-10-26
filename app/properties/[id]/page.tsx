@@ -74,7 +74,7 @@ export default async function PropertyByIdPage({
       </Link>
 
       <div className="mt-6 grid gap-3 overflow-hidden rounded-3xl sm:grid-cols-2">
-        <div className="relative min-h-[280px] sm:row-span-2 sm:min-h-[520px]">
+        <div className="relative min-h-70 sm:row-span-2 sm:min-h-130">
           <Image
             src={images[0]}
             alt={property.title}
@@ -88,7 +88,7 @@ export default async function PropertyByIdPage({
         {images.slice(1, 3).map((image, index) => (
           <div
             key={`${image}-${index}`}
-            className="relative hidden min-h-[250px] sm:block"
+            className="relative hidden min-h-62.5 sm:block"
           >
             <Image
               src={image}
@@ -101,7 +101,7 @@ export default async function PropertyByIdPage({
           </div>
         ))}
         {images.length === 1 && (
-          <div className="hidden min-h-[250px] bg-muted/40 sm:block" />
+          <div className="hidden min-h-62.5 bg-muted/40 sm:block" />
         )}
       </div>
 

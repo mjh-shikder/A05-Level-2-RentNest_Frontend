@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import RegisterForm from "@/app/(authGroup)/_authComponents/RegisterForm";
+import RegisterForm from "@/components/auth/RegisterForm";
 import Link from "next/link";
 import React from "react";
 
