@@ -9,7 +9,12 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
+requirements.md
+database-design.md
+api_response_reference.md
+PROJECT_MEMORY.md
+.github
+.gitignore
 # testing
 /coverage
 

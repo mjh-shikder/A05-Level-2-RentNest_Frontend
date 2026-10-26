@@ -87,7 +87,11 @@ const NavbarClient = ({
                   <Link
                     href={href}
                     aria-current={isActive ? "page" : undefined}
-                    className="rounded-full px-3 py-2 text-sm font-medium text-foreground/85 transition-colors hover:bg-white/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4"
+                    className={`rounded-full px-3 py-2 text-sm font-medium transition-colors hover:bg-white/15 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4 ${
+                      isActive
+                        ? "text-primary underline decoration-2 underline-offset-8"
+                        : "text-foreground/85"
+                    }`}
                   >
                     {label}
                   </Link>
