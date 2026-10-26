@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export type LoginState = {
   message: string;
@@ -22,6 +23,7 @@ export type LoginState = {
 
 
 
+//* Login Function
 export const loginAction = async (prevState: LoginState, formData: FormData) => {
 
     const email = formData.get("email")
@@ -49,6 +51,8 @@ export const loginAction = async (prevState: LoginState, formData: FormData) => 
             maxAge: 60 * 60 * 24,
             sameSite: "lax"
         })
+
+        redirect('/')
 
     }
 
@@ -78,4 +82,93 @@ export const loginAction = async (prevState: LoginState, formData: FormData) => 
     return result
     
     
+};
+
+
+export type RegisterState = {
+  message: string;
+  success: boolean;
+};
+
+const getResponseMessage = (body: unknown) => {
+  if (typeof body === "object" && body !== null && "message" in body) {
+    const { message } = body;
+    if (typeof message === "string" && message.trim()) return message;
+    if (Array.isArray(message)) return message.join(" ");
+  }
+
+  return undefined;
+};
+
+export const registerAction = async (
+  _prevState: RegisterState,
+  formData: FormData,
+): Promise<RegisterState> => {
+  const name = formData.get("name");
+  const email = formData.get("email");
+  const password = formData.get("password");
+  const phone = formData.get("phone");
+  const avatar = formData.get("avatar");
+  const role = formData.get("role");
+
+  if (
+    typeof name !== "string" ||
+    !name.trim() ||
+    typeof email !== "string" ||
+    !email.trim() ||
+    typeof password !== "string" ||
+    !password ||
+    (role !== "TENANT" && role !== "LANDLORD")
+  ) {
+    return { message: "Please complete all required fields.", success: false };
+  }
+
+  const payload = {
+    name: name.trim(),
+    email: email.trim(),
+    password,
+    phone: typeof phone === "string" && phone.trim() ? phone.trim() : undefined,
+    avatar:
+      typeof avatar === "string" && avatar.trim() ? avatar.trim() : undefined,
+    role,
+  };
+
+  const backendUrl = process.env.BACKEND_URL?.replace(/\/+$/, "");
+  if (!backendUrl) {
+    return { message: "The server API URL is not configured.", success: false };
+  }
+
+  try {
+    const response = await fetch(
+      `${backendUrl}/api/auth/register`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      },
+    );
+
+    const result: unknown = await response.json().catch(() => null);
+    const responseMessage = getResponseMessage(result);
+
+    if (!response.ok) {
+      return {
+        message:
+          responseMessage ||
+          `Registration failed (${response.status}). Please try again.`,
+        success: false,
+      };
+    }
+
+    return {
+      message: responseMessage || "Registration successful. You can now log in.",
+      success: true,
+      };
+  } catch {
+    return {
+      message: "Could not connect to the server. Please try again.",
+      success: false,
+    };
+  }
 };

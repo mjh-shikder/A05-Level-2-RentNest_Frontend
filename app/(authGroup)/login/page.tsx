@@ -17,7 +17,7 @@ const LoginPage = () => {
     </div>
     {/* Form */}
     <LoginForm />
-    <p className="text-center text-sm text-muted-foreground">
+    <p className="text-center text-sm text-muted">
       Don&apos;t have an account?{" "}
       <Button asChild variant="link" className="h-auto p-0">
         <Link href="/register">Sign up</Link>

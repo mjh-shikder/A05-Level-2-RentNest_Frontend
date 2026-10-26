@@ -44,7 +44,7 @@ const LoginForm = () => {
   return (
     <form action={action} className="space-y-5" method="POST">
       <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium">
+        <label htmlFor="email" className="text-sm font-medium text-white">
           Email
         </label>
         <Input
@@ -54,12 +54,12 @@ const LoginForm = () => {
           placeholder="you@example.com"
           autoComplete="email"
           required
-          className="border-white/30 bg-white/10 placeholder:text-foreground/50"
+          className="auth-glass-input border-white/30 placeholder:text-foreground/50"
         />
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="password" className="text-sm font-medium">
+        <label htmlFor="password" className="text-sm font-medium text-white">
           Password
         </label>
         <div className="relative">
@@ -70,7 +70,7 @@ const LoginForm = () => {
             placeholder="Enter your password"
             autoComplete="current-password"
             required
-            className="border-white/30 bg-white/10 pr-12 placeholder:text-foreground/50"
+            className="auth-glass-input border-white/30 pr-12 placeholder:text-foreground/50"
           />
           <Button
             type="button"
@@ -92,7 +92,6 @@ const LoginForm = () => {
         pending ? "Submittion..." : "Login"
        }
       </Button>
-      <p>Error will added here</p>
     </form>
   );
 };

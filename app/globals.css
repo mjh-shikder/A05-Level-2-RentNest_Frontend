@@ -128,3 +128,13 @@
     @apply font-sans;
   }
 }
+
+.auth-glass-input:-webkit-autofill,
+.auth-glass-input:-webkit-autofill:hover,
+.auth-glass-input:-webkit-autofill:focus {
+  background-color: transparent !important;
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
+  transition: background-color 9999s ease-out;
+}
