@@ -1,9 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
-import { Home, LayoutDashboard, LogOut, ShieldCheck, Users } from "lucide-react";
+import {
+  Home,
+  LayoutDashboard,
+  LogOut,
+  Pencil,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import { logoutAction } from "@/app/(authGroup)/_authActions/authActions";
 import { Button } from "@/components/ui/button";
+import ProfileForm from "@/components/dashboard/ProfileForm";
 import {
   requireDashboardUser,
   type DashboardRole,
@@ -24,17 +32,20 @@ const dashboardLinks: Record<
     { href: "#requests", label: "My requests", icon: Home },
     { href: "#payments", label: "Payments", icon: ShieldCheck },
     { href: "#reviews", label: "Reviews", icon: ShieldCheck },
+    { href: "#profile", label: "Edit profile", icon: Pencil },
   ],
   LANDLORD: [
     { href: "#overview", label: "Overview", icon: LayoutDashboard },
     { href: "#properties", label: "My properties", icon: Home },
     { href: "#requests", label: "Rental requests", icon: Users },
+    { href: "#profile", label: "Edit profile", icon: Pencil },
   ],
   ADMIN: [
     { href: "#overview", label: "Overview", icon: LayoutDashboard },
     { href: "#users", label: "Users", icon: Users },
     { href: "#properties", label: "Properties", icon: Home },
     { href: "#rentals", label: "Rentals", icon: ShieldCheck },
+    { href: "#profile", label: "Edit profile", icon: Pencil },
   ],
 };
 
@@ -119,7 +130,10 @@ const DashboardShell = async ({ children }: { children: ReactNode }) => {
         </div>
       </aside>
 
-      <div className="min-w-0 flex-1">{children}</div>
+      <div className="min-w-0 flex-1 space-y-7">
+        {children}
+        <ProfileForm user={user} />
+      </div>
     </div>
   );
 };

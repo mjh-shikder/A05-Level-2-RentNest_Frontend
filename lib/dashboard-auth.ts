@@ -7,6 +7,7 @@ export type DashboardUser = {
   name: string;
   role: DashboardRole;
   avatar: string;
+  phone: string;
 };
 
 const isDashboardRole = (value: unknown): value is DashboardRole =>
@@ -70,6 +71,10 @@ export const requireDashboardUser = async (
       avatar:
         "avatar" in userInfo && typeof userInfo.avatar === "string"
           ? userInfo.avatar
+          : "",
+      phone:
+        "phone" in userInfo && typeof userInfo.phone === "string"
+          ? userInfo.phone
           : "",
     },
   };

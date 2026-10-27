@@ -101,9 +101,9 @@ export default async function LandlordDashboard({
         title="Property management"
         description="Create, update, and remove your rental listings."
       >
-        <details className="mb-4 rounded-2xl border border-white/30 bg-white/10 p-5 backdrop-blur-xl dark:bg-black/10">
-          <summary className="cursor-pointer list-none font-semibold text-foreground marker:hidden">
-            Add a property listing
+        <details className="mb-4 rounded-2xl border border-black/30 dark:border-white/30  bg-white/10 p-5 backdrop-blur-xl dark:bg-black/10">
+          <summary className="cursor-pointer  list-none font-semibold text-foreground marker:hidden">
+           Add a property listing
           </summary>
           {categoriesResult.error ? (
             <p className="mt-4 text-sm text-muted-foreground">

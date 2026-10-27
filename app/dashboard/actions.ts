@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { requireDashboardUser } from "@/lib/dashboard-auth";
 import { getPropertyDetails, PropertyListingsError } from "@/lib/properties";
 
@@ -23,6 +24,116 @@ const redirectWithNotice = (
     type,
   });
   redirect(`${path}?${query.toString()}`);
+};
+
+export type ProfileActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
+const isValidAvatarUrl = (value: string) => {
+  if (!value) return true;
+  try {
+    const url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+};
+
+export const updateProfileAction = async (
+  _previousState: ProfileActionState,
+  formData: FormData,
+): Promise<ProfileActionState> => {
+  const { token, user } = await requireDashboardUser();
+  const name = formData.get("name");
+  const phone = formData.get("phone");
+  const avatar = formData.get("avatar");
+
+  if (
+    typeof name !== "string" ||
+    !name.trim() ||
+    name.trim().length > 120 ||
+    typeof phone !== "string" ||
+    phone.trim().length > 40 ||
+    typeof avatar !== "string" ||
+    avatar.trim().length > 2048 ||
+    !isValidAvatarUrl(avatar.trim())
+  ) {
+    return {
+      status: "error",
+      message: "Enter a valid name, phone number, and avatar URL.",
+    };
+  }
+
+  const backendUrl = process.env.BACKEND_URL?.replace(/\/+$/, "");
+  if (!backendUrl) {
+    return {
+      status: "error",
+      message: "The server API URL is not configured.",
+    };
+  }
+
+  let response: Response;
+  let result: unknown;
+  try {
+    response = await fetch(`${backendUrl}/api/user/update`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: name.trim(),
+        ...(phone.trim() ? { phone: phone.trim() } : {}),
+        avatar: avatar.trim(),
+      }),
+      cache: "no-store",
+    });
+    result = await response.json().catch(() => null);
+  } catch {
+    return {
+      status: "error",
+      message: "Could not connect to the server. Please try again.",
+    };
+  }
+
+  if (!response.ok) {
+    return {
+      status: "error",
+      message:
+        messageFrom(result) ||
+        `Profile update failed with status ${response.status}.`,
+    };
+  }
+
+  const cookieStore = await cookies();
+  cookieStore.set(
+    "userInfo",
+    JSON.stringify({
+      ...user,
+      name: name.trim(),
+      phone: phone.trim() || user.phone,
+      avatar: avatar.trim(),
+    }),
+    {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    },
+  );
+
+  revalidatePath("/dashboard/tenant");
+  revalidatePath("/dashboard/landlord");
+  revalidatePath("/dashboard/admin");
+  revalidatePath("/");
+
+  return {
+    status: "success",
+    message: messageFrom(result) || "Your profile has been updated.",
+  };
 };
 
 const postDashboardAction = async (
