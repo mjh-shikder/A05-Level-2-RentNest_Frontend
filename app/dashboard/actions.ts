@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireDashboardUser } from "@/lib/dashboard-auth";
+import { getPropertyDetails, PropertyListingsError } from "@/lib/properties";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -339,6 +340,54 @@ export const deletePropertyAction = async (formData: FormData) => {
   revalidatePath("/dashboard/landlord");
   redirectWithNotice(
     "/dashboard/landlord",
+    result.message,
+    result.ok ? "success" : "error",
+  );
+};
+
+export const deleteAdminPropertyAction = async (formData: FormData) => {
+  const { token } = await requireDashboardUser("ADMIN");
+  const propertyId = formData.get("propertyId");
+  const validPropertyId = typeof propertyId === "string" ? propertyId.trim() : "";
+  if (!validPropertyId) {
+    redirectWithNotice(
+      "/dashboard/admin",
+      "The property details are invalid.",
+      "error",
+    );
+  }
+
+  let property;
+  try {
+    property = await getPropertyDetails(validPropertyId);
+  } catch (error) {
+    return redirectWithNotice(
+      "/dashboard/admin",
+      error instanceof PropertyListingsError
+        ? `Could not verify property status: ${error.message}`
+        : "Could not verify the property status. Please try again.",
+      "error",
+    );
+  }
+
+  if (property.status.trim().toUpperCase() !== "AVAILABLE") {
+    redirectWithNotice(
+      "/dashboard/admin",
+      "Only available properties can be deleted.",
+      "error",
+    );
+  }
+
+  const result = await postDashboardAction(
+    `/api/landlord/properties/${encodeURIComponent(validPropertyId)}`,
+    token,
+    "DELETE",
+  );
+  revalidatePath("/dashboard/admin");
+  revalidatePath("/dashboard/landlord");
+  revalidatePath("/properties");
+  redirectWithNotice(
+    "/dashboard/admin",
     result.message,
     result.ok ? "success" : "error",
   );

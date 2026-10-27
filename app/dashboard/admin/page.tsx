@@ -12,6 +12,8 @@ import {
   firstSearchParam,
 } from "@/components/dashboard/DashboardUI";
 import AdminUsersTable from "@/components/dashboard/AdminUsersTable";
+import { deleteAdminPropertyAction } from "@/app/dashboard/actions";
+import { Button } from "@/components/ui/button";
 import { requireDashboardUser } from "@/lib/dashboard-auth";
 import {
   formatDashboardDate,
@@ -113,30 +115,74 @@ export default async function AdminDashboard({
             <DashboardEmpty message="Property listings could not be loaded." />
           ) : properties.length ? (
             <DashboardTable
-              headers={["Property", "Location", "Monthly rent", "Status"]}
+              headers={[
+                "Property",
+                "Location",
+                "Monthly rent",
+                "Status",
+                "Action",
+              ]}
             >
-              {properties.map((property, index) => (
-                <tr
-                  key={textValue(property.id, `property-${index}`)}
-                >
-                  <DashboardCell className="font-medium text-foreground">
-                    {textValue(property.title, "Untitled property")}
-                  </DashboardCell>
-                  <DashboardCell className="text-muted-foreground">
-                    {[textValue(property.city), textValue(property.country)]
-                      .filter(Boolean)
-                      .join(", ") || "—"}
-                  </DashboardCell>
-                  <DashboardCell className="text-foreground">
-                    {formatDashboardMoney(property.rent)}
-                  </DashboardCell>
-                  <DashboardCell>
-                    <DashboardStatus
-                      status={textValue(property.status, "UNKNOWN")}
-                    />
-                  </DashboardCell>
-                </tr>
-              ))}
+              {properties.map((property, index) => {
+                const propertyId = textValue(property.id);
+                const isAvailable =
+                  textValue(property.status).trim().toUpperCase() ===
+                  "AVAILABLE";
+
+                return (
+                  <tr key={propertyId || `property-${index}`}>
+                    <DashboardCell className="font-medium text-foreground">
+                      {textValue(property.title, "Untitled property")}
+                    </DashboardCell>
+                    <DashboardCell className="text-muted-foreground">
+                      {[textValue(property.city), textValue(property.country)]
+                        .filter(Boolean)
+                        .join(", ") || "—"}
+                    </DashboardCell>
+                    <DashboardCell className="text-foreground">
+                      {formatDashboardMoney(property.rent)}
+                    </DashboardCell>
+                    <DashboardCell>
+                      <DashboardStatus
+                        status={textValue(property.status, "UNKNOWN")}
+                      />
+                    </DashboardCell>
+                    <DashboardCell>
+                      {propertyId && isAvailable ? (
+                        <form action={deleteAdminPropertyAction}>
+                          <input
+                            type="hidden"
+                            name="propertyId"
+                            value={propertyId}
+                          />
+                          <Button
+                            type="submit"
+                            size="sm"
+                            variant="destructive"
+                          >
+                            Delete
+                          </Button>
+                        </form>
+                      ) : propertyId ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="destructive"
+                          disabled
+                          aria-label={`Cannot delete ${textValue(
+                            property.title,
+                            "property",
+                          )} because it is not available`}
+                        >
+                          Delete
+                        </Button>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">—</span>
+                      )}
+                    </DashboardCell>
+                  </tr>
+                );
+              })}
             </DashboardTable>
           ) : (
             <DashboardEmpty message="No property listings found." />

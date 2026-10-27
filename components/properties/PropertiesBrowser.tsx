@@ -12,6 +12,8 @@ import { PropertyCardStateProvider } from "@/components/properties/PropertyCardS
 import type { PropertyListing } from "@/lib/properties";
 import type { DashboardRole } from "@/lib/dashboard-auth";
 
+const PAGE_SIZE = 9;
+
 const fieldClassName =
   "h-11 rounded-xl border-white/40 bg-white/30 text-foreground shadow-none backdrop-blur-sm dark:border-white/15 dark:bg-black/20";
 
@@ -30,6 +32,7 @@ const PropertiesBrowser = ({
   const [minRent, setMinRent] = useState("");
   const [maxRent, setMaxRent] = useState("");
   const [sort, setSort] = useState("recommended");
+  const [page, setPage] = useState(1);
 
   const categories = useMemo(
     () =>
@@ -99,6 +102,13 @@ const PropertiesBrowser = ({
     sort,
   ]);
 
+  const pageCount = Math.max(1, Math.ceil(filteredProperties.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const visibleProperties = filteredProperties.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
   const clearFilters = () => {
     setQuery("");
     setCategory("all");
@@ -108,6 +118,7 @@ const PropertiesBrowser = ({
     setMinRent("");
     setMaxRent("");
     setSort("recommended");
+    setPage(1);
   };
 
   return (
@@ -252,9 +263,9 @@ const PropertiesBrowser = ({
       </div>
 
       {filteredProperties.length ? (
-        <PropertyCardStateProvider properties={filteredProperties} role={role}>
+        <PropertyCardStateProvider properties={visibleProperties} role={role}>
           <div className="mt-4 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {filteredProperties.map((property) => (
+            {visibleProperties.map((property) => (
               <PropertyCard key={property.id} propertyId={property.id} />
             ))}
           </div>
@@ -271,6 +282,42 @@ const PropertiesBrowser = ({
             Clear filters
           </Button>
         </div>
+      )}
+
+      {filteredProperties.length > 0 && (
+        <nav
+          aria-label="Property listing pages"
+          className="mt-6 flex flex-wrap items-center justify-between gap-3"
+        >
+          <p className="text-sm text-muted-foreground" aria-live="polite">
+            Showing {(currentPage - 1) * PAGE_SIZE + 1}–
+            {Math.min(currentPage * PAGE_SIZE, filteredProperties.length)} of{" "}
+            {filteredProperties.length} properties
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={currentPage === 1}
+              onClick={() => setPage(currentPage - 1)}
+            >
+              Previous
+            </Button>
+            <span className="px-2 text-sm text-muted-foreground">
+              Page {currentPage} of {pageCount}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={currentPage === pageCount}
+              onClick={() => setPage(currentPage + 1)}
+            >
+              Next
+            </Button>
+          </div>
+        </nav>
       )}
     </div>
   );
