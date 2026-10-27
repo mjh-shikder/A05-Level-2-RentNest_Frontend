@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { deletePropertyAction } from "@/app/dashboard/actions";
 import PropertyForm from "@/components/dashboard/PropertyForm";
+import PropertyEditDialog from "@/components/dashboard/PropertyEditDialog";
 import {
   DashboardCell,
   DashboardEmpty,
@@ -182,35 +183,32 @@ export default async function LandlordDashboard({
                       </Link>
                       {propertyId && (
                         <div className="flex flex-wrap gap-3">
-                          <details className="max-w-[min(80vw,42rem)]">
-                            <summary className="cursor-pointer text-sm font-medium text-foreground underline-offset-4 hover:underline">
-                              Edit listing
-                            </summary>
-                            <div className="mt-3 w-[min(80vw,42rem)] rounded-2xl border border-border bg-background/95 p-4 shadow-lg backdrop-blur-xl sm:p-6">
-                              <h3 className="mb-4 font-semibold text-foreground">
-                                Edit {textValue(property.title, "listing")}
-                              </h3>
-                              {categoriesResult.error ? (
-                                <DashboardError
-                                  message="Property categories could not be loaded."
-                                />
-                              ) : (
-                                <PropertyForm
-                                  categories={categoriesResult.records
-                                    .filter(
-                                      (category) =>
-                                        typeof category.id === "string" &&
-                                        typeof category.name === "string",
-                                    )
-                                    .map((category) => ({
-                                      id: textValue(category.id),
-                                      name: textValue(category.name),
-                                    }))}
-                                  property={property}
-                                />
-                              )}
-                            </div>
-                          </details>
+                          <PropertyEditDialog
+                            title={`Edit ${textValue(
+                              property.title,
+                              "listing",
+                            )}`}
+                          >
+                            {categoriesResult.error ? (
+                              <DashboardError
+                                message="Property categories could not be loaded."
+                              />
+                            ) : (
+                              <PropertyForm
+                                categories={categoriesResult.records
+                                  .filter(
+                                    (category) =>
+                                      typeof category.id === "string" &&
+                                      typeof category.name === "string",
+                                  )
+                                  .map((category) => ({
+                                    id: textValue(category.id),
+                                    name: textValue(category.name),
+                                  }))}
+                                property={property}
+                              />
+                            )}
+                          </PropertyEditDialog>
                           <form action={deletePropertyAction}>
                             <input
                               type="hidden"
