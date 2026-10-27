@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -30,6 +31,10 @@ const roleLabel: Record<NavbarUser["role"], string> = {
   ADMIN: "Admin",
 };
 
+const subscribeToNothing = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 const getInitials = (name: string) =>
   name
     .trim()
@@ -47,7 +52,12 @@ const NavbarClient = ({
 }) => {
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+  const themeReady = useSyncExternalStore(
+    subscribeToNothing,
+    getClientSnapshot,
+    getServerSnapshot,
+  );
+  const isDark = themeReady && resolvedTheme === "dark";
 
   // The login and registration screens use full-screen backgrounds and keep
   // their existing focused layout without the site navigation.
@@ -64,12 +74,20 @@ const NavbarClient = ({
       <div className="mx-auto grid min-h-16 w-full max-w-7xl grid-cols-[1fr_auto] items-center gap-2 px-4 py-2 sm:grid-cols-[1fr_auto_1fr] sm:gap-3 sm:px-6 sm:py-0">
         <Link href="/" aria-label="Rent Nest home" className="w-fit">
           <Image
-            src={isDark ? "/ren_nest-Logo-Dark.png" : "/ren_nest-Logo-Light.png"}
+            src="/ren_nest-Logo-Light.png"
             alt="Rent Nest"
             width={160}
             height={40}
             priority
-            className="h-7 w-auto object-contain sm:h-9"
+            className="h-7 w-auto object-contain dark:hidden sm:h-9"
+          />
+          <Image
+            src="/ren_nest-Logo-Dark.png"
+            alt="Rent Nest"
+            width={160}
+            height={40}
+            priority
+            className="hidden h-7 w-auto object-contain dark:block sm:h-9"
           />
         </Link>
 
@@ -104,9 +122,19 @@ const NavbarClient = ({
         <div className="col-start-2 row-start-1 flex items-center justify-self-end gap-2 sm:col-auto sm:row-auto">
           <button
             type="button"
-            onClick={() => setTheme(isDark ? "light" : "dark")}
-            aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
-            title={`Switch to ${isDark ? "light" : "dark"} theme`}
+            onClick={() =>
+              setTheme(resolvedTheme === "dark" ? "light" : "dark")
+            }
+            aria-label={
+              themeReady
+                ? `Switch to ${isDark ? "light" : "dark"} theme`
+                : "Toggle color theme"
+            }
+            title={
+              themeReady
+                ? `Switch to ${isDark ? "light" : "dark"} theme`
+                : "Toggle color theme"
+            }
             className="inline-flex size-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-foreground transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}

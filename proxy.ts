@@ -2,15 +2,18 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
   const hasAccessToken = Boolean(request.cookies.get("accessToken")?.value);
-  const isPropertyDetailsPage = request.nextUrl.pathname.startsWith(
-    "/properties/",
-  );
   const isAuthPage =
     request.nextUrl.pathname === "/login" ||
     request.nextUrl.pathname === "/register";
+  const isDashboard = request.nextUrl.pathname.startsWith("/dashboard");
 
-  if (isPropertyDetailsPage && !hasAccessToken) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  if (isDashboard && !hasAccessToken) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set(
+      "next",
+      `${request.nextUrl.pathname}${request.nextUrl.search}`,
+    );
+    return NextResponse.redirect(loginUrl);
   }
 
   if (isAuthPage && hasAccessToken) {
@@ -21,5 +24,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/register", "/properties/:path+"],
+  matcher: ["/login", "/register", "/dashboard/:path*"],
 };
