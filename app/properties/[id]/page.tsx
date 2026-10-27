@@ -13,6 +13,8 @@ import {
   getPropertyDetails,
   PropertyListingsError,
 } from "@/lib/properties";
+import { getDashboardRole } from "@/lib/dashboard-auth";
+import RequestRentalForm from "@/components/properties/RequestRentalForm";
 
 const formatRent = (amount: number) =>
   new Intl.NumberFormat("en-BD", { maximumFractionDigits: 0 }).format(amount);
@@ -31,6 +33,7 @@ export default async function PropertyByIdPage({
   params,
 }: PageProps<"/properties/[id]">) {
   const { id } = await params;
+  const role = await getDashboardRole();
   let property;
 
   try {
@@ -63,6 +66,7 @@ export default async function PropertyByIdPage({
   const images = property.images.length
     ? property.images
     : ["/register-bg.jpg"];
+  const propertyStatus = property.status.trim().toUpperCase();
 
   return (
     <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
@@ -113,7 +117,7 @@ export default async function PropertyByIdPage({
                 {property.category}
               </span>
             )}
-            <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-xl dark:bg-black/10">
+            <span className={` rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-medium  backdrop-blur-xl dark:bg-black/10 ${propertyStatus=== "RENTED" ? "text-amber-400 ": ""}`}>
               {property.status}
             </span>
           </div>
@@ -235,6 +239,36 @@ export default async function PropertyByIdPage({
             <p className="mt-2 text-sm text-muted-foreground">
               Security deposit: ৳{formatRent(property.securityDeposit)}
             </p>
+          )}
+
+          {role === "TENANT" && (
+            <section id="rental-request" className="mt-6 scroll-mt-24">
+              <h2 className="font-semibold text-foreground">
+                Request to rent
+              </h2>
+              {propertyStatus === "AVAILABLE" ? (
+                <>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    Choose your move-in date and send a request to the property
+                    owner. You can track its status from your tenant dashboard.
+                  </p>
+                  <RequestRentalForm propertyId={property.id} />
+                </>
+              ) : propertyStatus === "RENTED" ||
+                propertyStatus === "UNAVAILABLE" ? (
+                <button
+                  type="button"
+                  disabled
+                  className="mt-4 inline-flex min-h-10 w-full cursor-not-allowed items-center justify-center rounded-full bg-muted px-4 py-2 text-sm font-semibold text-muted-foreground"
+                >
+                  Not available for rent
+                </button>
+              ) : (
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Rental requests are currently unavailable for this property.
+                </p>
+              )}
+            </section>
           )}
 
           <div className="my-6 border-t border-border/70" />

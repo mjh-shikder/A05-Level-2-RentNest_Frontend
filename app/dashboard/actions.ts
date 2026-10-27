@@ -62,6 +62,67 @@ const postDashboardAction = async (
   }
 };
 
+export type RentalRequestActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+};
+
+const isDateInput = (value: string) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+};
+
+export const createRentalRequestAction = async (
+  _previousState: RentalRequestActionState,
+  formData: FormData,
+): Promise<RentalRequestActionState> => {
+  const { token } = await requireDashboardUser("TENANT");
+  const propertyId = formData.get("propertyId");
+  const startDate = formData.get("startDate");
+  const endDate = formData.get("endDate");
+  const message = formData.get("message");
+
+  if (
+    typeof propertyId !== "string" ||
+    !propertyId.trim() ||
+    typeof startDate !== "string" ||
+    !isDateInput(startDate) ||
+    (typeof endDate !== "string" && endDate !== null) ||
+    (typeof endDate === "string" &&
+      endDate !== "" &&
+      (!isDateInput(endDate) || endDate <= startDate)) ||
+    (typeof message !== "string" && message !== null)
+  ) {
+    return {
+      status: "error",
+      message: "Enter a valid start date and an end date after it.",
+    };
+  }
+
+  const result = await postDashboardAction(
+    "/api/rental/create-request",
+    token,
+    "POST",
+    {
+      propertyId: propertyId.trim(),
+      startDate,
+      ...(typeof endDate === "string" && endDate ? { endDate } : {}),
+      ...(typeof message === "string" && message.trim()
+        ? { message: message.trim() }
+        : {}),
+    },
+  );
+
+  if (result.ok) {
+    revalidatePath("/dashboard/tenant");
+    revalidatePath("/properties");
+    return { status: "success", message: result.message };
+  }
+
+  return { status: "error", message: result.message };
+};
+
 export const updateRentalRequestAction = async (formData: FormData) => {
   const { token } = await requireDashboardUser("LANDLORD");
   const requestId = formData.get("requestId");

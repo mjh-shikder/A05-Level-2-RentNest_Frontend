@@ -111,7 +111,7 @@ const normalizeListing = (value: unknown): PropertyListing | null => {
     bathrooms: readNumber(value.bathrooms),
     area: readNumber(value.area),
     furnished: typeof value.furnished === "boolean" ? value.furnished : null,
-    status: readText(value.status, "Status unavailable"),
+    status: readText(value.status, "Status unavailable").trim(),
     category,
     images: readImages(value.images),
     averageRating: rating,
@@ -180,7 +180,10 @@ const fetchApiData = async (url: string, resourceName: string) => {
     );
   }
 
-  return data;
+  return {
+    data,
+    meta: isRecord(body) ? body.meta : undefined,
+  };
 
 };
 
@@ -197,18 +200,49 @@ export const getPropertyListings = async (): Promise<PropertyListing[]> => {
     throw new PropertyListingsError("The property service is not configured.");
   }
 
-  const data = await fetchApiData(
-    `${backendUrl}/api/all/properties`,
-    "property",
-  );
-
+  const endpoint = `${backendUrl}/api/all/properties`;
+  const firstPage = await fetchApiData(endpoint, "property");
+  const data = firstPage.data;
 
   if (!Array.isArray(data)) {
     throw new PropertyListingsError("The property service returned listings in an unexpected format.",
     );
   }
 
-  const listings = data.map(normalizeListing);
+  let totalPages = 1;
+  if (
+    isRecord(firstPage.meta) &&
+    "totalPage" in firstPage.meta &&
+    firstPage.meta.totalPage !== undefined
+  ) {
+    const totalPagesValue = firstPage.meta.totalPage;
+    if (
+      typeof totalPagesValue !== "number" ||
+      !Number.isInteger(totalPagesValue) ||
+      totalPagesValue < 1
+    ) {
+      throw new PropertyListingsError(
+        "The property service returned invalid pagination details.",
+      );
+    }
+    totalPages = totalPagesValue;
+  }
+  const allListings: unknown[] = [...data];
+
+  for (let page = 2; page <= totalPages; page += 1) {
+    const pageData = await fetchApiData(
+      `${endpoint}?page=${page}`,
+      "property",
+    );
+    if (!Array.isArray(pageData.data)) {
+      throw new PropertyListingsError(
+        "The property service returned listings in an unexpected format.",
+      );
+    }
+    allListings.push(...pageData.data);
+  }
+
+  const listings = allListings.map(normalizeListing);
 
 
   if (listings.some((listing) => listing === null)) {
@@ -231,10 +265,11 @@ export const getPropertyDetails = async (id: string,): Promise<PropertyDetails> 
   }
 
 
-  const data = await fetchApiData(
+  const response = await fetchApiData(
 `${backendUrl}/api/properties/${encodeURIComponent(id)}`,
     "property",
   );
+  const data = response.data;
 
 
 

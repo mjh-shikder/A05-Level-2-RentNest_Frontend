@@ -12,6 +12,26 @@ export type DashboardUser = {
 const isDashboardRole = (value: unknown): value is DashboardRole =>
   value === "TENANT" || value === "LANDLORD" || value === "ADMIN";
 
+export const getDashboardRole = async (): Promise<DashboardRole | null> => {
+  const cookieStore = await cookies();
+  try {
+    const userInfo: unknown = JSON.parse(
+      cookieStore.get("userInfo")?.value ?? "null",
+    );
+    if (
+      typeof userInfo === "object" &&
+      userInfo !== null &&
+      "role" in userInfo &&
+      isDashboardRole(userInfo.role)
+    ) {
+      return userInfo.role;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+};
+
 export const requireDashboardUser = async (
   expectedRole?: DashboardRole,
 ): Promise<{ token: string; user: DashboardUser }> => {

@@ -5,8 +5,10 @@ import {
   PropertyListingsError,
 } from "@/lib/properties";
 import type { PropertyListing } from "@/lib/properties";
+import { getDashboardRole } from "@/lib/dashboard-auth";
 
 export default async function PropertiesPage() {
+  const role = await getDashboardRole();
   let properties: PropertyListing[] | null = null;
   let errorMessage: string | null = null;
 
@@ -52,7 +54,7 @@ export default async function PropertiesPage() {
           </Link>
         </section>
       ) : properties?.length ? (
-        <PropertiesBrowser properties={properties} />
+        <PropertiesBrowser properties={properties} role={role} />
       ) : (
         <section className="rounded-3xl border border-dashed border-border bg-muted/20 px-6 py-16 text-center">
           <h2 className="text-lg font-semibold text-foreground">
