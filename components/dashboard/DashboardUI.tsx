@@ -30,20 +30,65 @@ export const DashboardLoading = () => (
     aria-busy="true"
     className="space-y-7"
   >
-    <div className="space-y-3">
-      <div className="h-3 w-32 animate-pulse rounded bg-muted" />
-      <div className="h-8 w-64 max-w-full animate-pulse rounded bg-muted" />
-      <div className="h-4 w-80 max-w-full animate-pulse rounded bg-muted" />
+    <div aria-hidden="true" className="space-y-3">
+      <div className="h-3 w-36 animate-pulse rounded bg-muted" />
+      <div className="h-8 w-72 max-w-full animate-pulse rounded bg-muted" />
+      <div className="h-4 w-96 max-w-full animate-pulse rounded bg-muted" />
     </div>
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+
+    <div
+      aria-hidden="true"
+      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+    >
       {Array.from({ length: 4 }, (_, index) => (
         <div
           key={index}
-          className="h-28 animate-pulse rounded-2xl border border-white/30 bg-white/10 p-5 dark:bg-black/10"
-        />
+          className="space-y-3 rounded-2xl border border-white/30 bg-white/10 p-5 shadow-sm backdrop-blur-xl dark:bg-black/10"
+        >
+          <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+          <div className="h-7 w-1/3 animate-pulse rounded bg-muted" />
+          <div className="h-3 w-4/5 animate-pulse rounded bg-muted" />
+        </div>
       ))}
     </div>
-    <div className="h-80 animate-pulse rounded-2xl border border-white/30 bg-white/10 dark:bg-black/10" />
+
+    {Array.from({ length: 2 }, (_, sectionIndex) => (
+      <section key={sectionIndex} aria-hidden="true">
+        <div className="mb-4 space-y-2">
+          <div className="h-5 w-48 animate-pulse rounded bg-muted" />
+          <div className="h-4 w-80 max-w-full animate-pulse rounded bg-muted" />
+        </div>
+        <div className="overflow-hidden rounded-2xl border border-white/30 bg-white/10 shadow-sm backdrop-blur-xl dark:bg-black/10">
+          <div className="overflow-x-auto">
+            <div className="min-w-155">
+              <div className="grid grid-cols-5 gap-4 border-b border-border/70 px-4 py-3">
+                {Array.from({ length: 5 }, (_, cellIndex) => (
+                  <div
+                    key={cellIndex}
+                    className="h-3 w-2/3 animate-pulse rounded bg-muted"
+                  />
+                ))}
+              </div>
+              {Array.from({ length: 4 }, (_, rowIndex) => (
+                <div
+                  key={rowIndex}
+                  className="grid grid-cols-5 gap-4 border-b border-border/50 px-4 py-4 last:border-b-0"
+                >
+                  {Array.from({ length: 5 }, (_, cellIndex) => (
+                    <div
+                      key={cellIndex}
+                      className={`h-4 animate-pulse rounded bg-muted ${
+                        cellIndex === 0 ? "w-4/5" : "w-2/3"
+                      }`}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    ))}
   </div>
 );
 
@@ -101,7 +146,7 @@ export const DashboardTable = ({
   children: ReactNode;
 }) => (
   <div className="overflow-x-auto">
-    <table className="w-full min-w-[620px] border-collapse text-left text-sm">
+    <table className="w-full min-w-155 border-collapse text-left text-sm">
       <thead>
         <tr className="border-b border-border/70 text-xs uppercase tracking-wide text-muted-foreground">
           {headers.map((header) => (

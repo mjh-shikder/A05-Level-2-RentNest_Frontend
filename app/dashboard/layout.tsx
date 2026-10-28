@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { logoutAction } from "@/app/(authGroup)/_authActions/authActions";
 import { Button } from "@/components/ui/button";
+import { DashboardLoading } from "@/components/dashboard/DashboardUI";
 import ProfileForm from "@/components/dashboard/ProfileForm";
 import {
   requireDashboardUser,
@@ -142,8 +143,36 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => (
   <Suspense
     fallback={
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8 lg:flex-row lg:gap-8 lg:px-8">
-        <div className="h-36 animate-pulse rounded-3xl bg-muted/50 lg:w-64" />
-        <div className="h-80 flex-1 animate-pulse rounded-3xl bg-muted/50" />
+        <aside
+          aria-hidden="true"
+          className="h-fit w-full shrink-0 space-y-4 rounded-3xl border border-white/30 bg-white/10 p-4 shadow-sm backdrop-blur-xl dark:bg-black/10 lg:w-64"
+        >
+          <div className="flex items-center gap-3 p-3">
+            <div className="size-12 animate-pulse rounded-full bg-muted" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+              <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
+            </div>
+          </div>
+          <div className="flex gap-2 overflow-hidden lg:flex-col">
+            {Array.from({ length: 5 }, (_, index) => (
+              <div
+                key={index}
+                className="h-10 min-w-24 animate-pulse rounded-xl bg-muted/70 lg:w-full"
+              />
+            ))}
+          </div>
+          <div className="border-t border-border/70 pt-4">
+            <div className="h-10 animate-pulse rounded-xl bg-muted/70" />
+          </div>
+        </aside>
+        <div className="min-w-0 flex-1 space-y-7">
+          <DashboardLoading />
+          <div
+            aria-hidden="true"
+            className="h-64 animate-pulse rounded-3xl border border-white/30 bg-white/10 dark:bg-black/10"
+          />
+        </div>
       </div>
     }
   >
