@@ -1,5 +1,5 @@
 import { savePropertyAction } from "@/app/dashboard/actions";
-import { Button } from "@/components/ui/button";
+import PropertyFormSubmitButton from "@/components/dashboard/PropertyFormSubmitButton";
 import type { DashboardRecord } from "@/lib/dashboard-data";
 
 type PropertyCategory = {
@@ -230,9 +230,7 @@ const PropertyForm = ({
         </label>
       </div>
 
-      <Button type="submit">
-        {property ? "Save changes" : "Create listing"}
-      </Button>
+      <PropertyFormSubmitButton isUpdate={Boolean(property)} />
     </form>
   );
 };

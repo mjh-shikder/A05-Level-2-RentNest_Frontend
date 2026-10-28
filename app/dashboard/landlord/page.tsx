@@ -18,6 +18,7 @@ import {
   firstSearchParam,
 } from "@/components/dashboard/DashboardUI";
 import { Button } from "@/components/ui/button";
+import DashboardActionButton from "@/components/dashboard/DashboardActionButton";
 import {
   updateRentalRequestAction,
 } from "@/app/dashboard/actions";
@@ -312,9 +313,10 @@ async function LandlordDashboardContent({
                               name="status"
                               value="APPROVED"
                             />
-                            <Button type="submit" size="sm">
-                              Approve
-                            </Button>
+                            <DashboardActionButton
+                              label="Approve"
+                              pendingLabel="Approving..."
+                            />
                           </form>
                           <form action={updateRentalRequestAction}>
                             <input
@@ -327,13 +329,11 @@ async function LandlordDashboardContent({
                               name="status"
                               value="REJECTED"
                             />
-                            <Button
-                              type="submit"
-                              size="sm"
+                            <DashboardActionButton
+                              label="Reject"
+                              pendingLabel="Rejecting..."
                               variant="outline"
-                            >
-                              Reject
-                            </Button>
+                            />
                           </form>
                         </div>
                       ) : (

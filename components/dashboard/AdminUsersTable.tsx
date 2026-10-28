@@ -9,6 +9,7 @@ import {
   DashboardStatus,
   DashboardTable,
 } from "@/components/dashboard/DashboardUI";
+import DashboardActionButton from "@/components/dashboard/DashboardActionButton";
 import { Button } from "@/components/ui/button";
 import { formatDashboardDate } from "@/lib/dashboard-data";
 
@@ -117,15 +118,17 @@ const AdminUsersTable = ({ users }: { users: AdminUser[] }) => {
                           name="status"
                           value={nextStatus}
                         />
-                        <Button
-                          type="submit"
-                          size="sm"
+                        <DashboardActionButton
+                          label={nextStatus === "BLOCKED" ? "Block" : "Unblock"}
+                          pendingLabel={
+                            nextStatus === "BLOCKED"
+                              ? "Blocking..."
+                              : "Unblocking..."
+                          }
                           variant={
                             nextStatus === "BLOCKED" ? "outline" : "default"
                           }
-                        >
-                          {nextStatus === "BLOCKED" ? "Block" : "Unblock"}
-                        </Button>
+                        />
                       </form>
                     ) : (
                       <span className="text-sm text-muted-foreground">—</span>

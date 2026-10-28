@@ -15,10 +15,8 @@ import {
   firstSearchParam,
 } from "@/components/dashboard/DashboardUI";
 import { Button } from "@/components/ui/button";
-import {
-  createCheckoutAction,
-  createReviewAction,
-} from "@/app/dashboard/actions";
+import { createCheckoutAction } from "@/app/dashboard/actions";
+import ReviewForm from "@/components/dashboard/ReviewForm";
 import { requireDashboardUser } from "@/lib/dashboard-auth";
 import {
   formatDashboardDate,
@@ -247,53 +245,15 @@ async function TenantDashboardContent({
                 textValue(property?.id) || textValue(request.propertyId);
               const requestId = textValue(request.id);
               return (
-                <form
+                <ReviewForm
                   key={requestId}
-                  action={createReviewAction}
-                  className="rounded-2xl border border-white/30 bg-white/10 p-5 shadow-sm backdrop-blur-xl dark:bg-black/10"
-                >
-                  <input
-                    type="hidden"
-                    name="propertyId"
-                    value={propertyId}
-                  />
-                  <input
-                    type="hidden"
-                    name="requestId"
-                    value={requestId}
-                  />
-                  <h3 className="font-semibold text-foreground">
-                    {textValue(property?.title, "Completed rental")}
-                  </h3>
-                  <label className="mt-4 block space-y-1.5 text-sm font-medium text-foreground">
-                    Rating
-                    <select
-                      name="rating"
-                      required
-                      defaultValue="5"
-                      className="h-10 w-full rounded-xl border border-input bg-transparent px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      <option value="5">5 - Excellent</option>
-                      <option value="4">4 - Good</option>
-                      <option value="3">3 - Average</option>
-                      <option value="2">2 - Below average</option>
-                      <option value="1">1 - Poor</option>
-                    </select>
-                  </label>
-                  <label className="mt-4 block space-y-1.5 text-sm font-medium text-foreground">
-                    Comment
-                    <textarea
-                      name="comment"
-                      rows={3}
-                      maxLength={1000}
-                      placeholder="What should future tenants know?"
-                      className="w-full rounded-xl border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
-                  </label>
-                  <Button type="submit" className="mt-4">
-                    Submit review
-                  </Button>
-                </form>
+                  propertyId={propertyId}
+                  requestId={requestId}
+                  propertyTitle={textValue(
+                    property?.title,
+                    "Completed rental",
+                  )}
+                />
               );
             })}
         </div>

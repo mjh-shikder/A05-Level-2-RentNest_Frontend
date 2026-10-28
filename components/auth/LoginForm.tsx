@@ -89,7 +89,7 @@ const LoginForm = () => {
 
       <Button type="submit" className="w-full">
               {
-        pending ? "Submittion..." : "Login"
+        pending ? "Submitting..." : "Login"
        }
       </Button>
       {state.error && (
