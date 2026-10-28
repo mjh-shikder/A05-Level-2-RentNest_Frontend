@@ -49,6 +49,17 @@ const PropertyForm = ({
           value={getStringValue(property.id)}
         />
       )}
+      <input
+        type="hidden"
+        name="status"
+        value={
+          ["MAINTENANCE", "RENTED"].includes(
+            getStringValue(property?.status).trim().toUpperCase(),
+          )
+            ? getStringValue(property?.status).trim().toUpperCase()
+            : "AVAILABLE"
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="space-y-1.5 text-sm font-medium text-foreground">
@@ -83,6 +94,7 @@ const PropertyForm = ({
           <textarea
             name="description"
             rows={3}
+            required
             defaultValue={getStringValue(property?.description)}
             className={`${fieldClassName} h-auto py-2`}
           />
@@ -202,21 +214,6 @@ const PropertyForm = ({
             defaultValue={getStringValue(property?.availableFrom).slice(0, 10)}
             className={fieldClassName}
           />
-        </label>
-        <label className="space-y-1.5 text-sm font-medium text-foreground">
-          Listing status
-          <select
-            name="status"
-            defaultValue={
-              getStringValue(property?.status) === "UNAVAILABLE"
-                ? "UNAVAILABLE"
-                : "AVAILABLE"
-            }
-            className={fieldClassName}
-          >
-            <option value="AVAILABLE">Available</option>
-            <option value="UNAVAILABLE">Unavailable</option>
-          </select>
         </label>
         <label className="space-y-1.5 text-sm font-medium text-foreground sm:col-span-2">
           Image URLs

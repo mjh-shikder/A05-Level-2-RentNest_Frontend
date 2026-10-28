@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import {
   DashboardCell,
   DashboardEmpty,
   DashboardError,
+  DashboardLoading,
   DashboardNotice,
   DashboardPageHeader,
   DashboardPanel,
@@ -27,9 +29,11 @@ import {
   textValue,
 } from "@/lib/dashboard-data";
 
-export default async function TenantDashboard({
+async function TenantDashboardContent({
   searchParams,
-}: PageProps<"/dashboard/tenant">) {
+}: {
+  searchParams: PageProps<"/dashboard/tenant">["searchParams"];
+}) {
   const { token, user } = await requireDashboardUser("TENANT");
   const params = await searchParams;
   const [requestsResult, paymentsResult] = await Promise.all([
@@ -302,5 +306,15 @@ export default async function TenantDashboard({
         )}
       </DashboardSection>
     </div>
+  );
+}
+
+export default function TenantDashboard({
+  searchParams,
+}: PageProps<"/dashboard/tenant">) {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <TenantDashboardContent searchParams={searchParams} />
+    </Suspense>
   );
 }

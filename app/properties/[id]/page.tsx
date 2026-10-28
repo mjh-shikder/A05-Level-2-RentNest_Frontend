@@ -254,8 +254,9 @@ export default async function PropertyByIdPage({
                   </p>
                   <RequestRentalForm propertyId={property.id} />
                 </>
-              ) : propertyStatus === "RENTED" ||
-                propertyStatus === "UNAVAILABLE" ? (
+              ) : ["RENTED", "UNAVAILABLE", "MAINTENANCE"].includes(
+                  propertyStatus,
+                ) ? (
                 <button
                   type="button"
                   disabled

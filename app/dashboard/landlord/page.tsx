@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { deletePropertyAction } from "@/app/dashboard/actions";
 import PropertyForm from "@/components/dashboard/PropertyForm";
 import PropertyEditDialog from "@/components/dashboard/PropertyEditDialog";
@@ -6,6 +7,7 @@ import {
   DashboardCell,
   DashboardEmpty,
   DashboardError,
+  DashboardLoading,
   DashboardNotice,
   DashboardPageHeader,
   DashboardPanel,
@@ -29,9 +31,11 @@ import {
   textValue,
 } from "@/lib/dashboard-data";
 
-export default async function LandlordDashboard({
+async function LandlordDashboardContent({
   searchParams,
-}: PageProps<"/dashboard/landlord">) {
+}: {
+  searchParams: PageProps<"/dashboard/landlord">["searchParams"];
+}) {
   const { token, user } = await requireDashboardUser("LANDLORD");
   const params = await searchParams;
   const [propertiesResult, requestsResult, categoriesResult] = await Promise.all([
@@ -346,5 +350,15 @@ export default async function LandlordDashboard({
         </DashboardPanel>
       </DashboardSection>
     </div>
+  );
+}
+
+export default function LandlordDashboard({
+  searchParams,
+}: PageProps<"/dashboard/landlord">) {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <LandlordDashboardContent searchParams={searchParams} />
+    </Suspense>
   );
 }

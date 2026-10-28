@@ -115,8 +115,9 @@ const PropertyCard = ({ propertyId }: { propertyId: string }) => {
               >
                 Request to rent
               </Link>
-            ) : propertyStatus === "RENTED" ||
-              propertyStatus === "UNAVAILABLE" ? (
+            ) : ["RENTED", "UNAVAILABLE", "MAINTENANCE"].includes(
+                propertyStatus,
+              ) ? (
               <Button
                 type="button"
                 disabled

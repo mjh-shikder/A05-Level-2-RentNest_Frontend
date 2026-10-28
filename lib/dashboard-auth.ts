@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 export type DashboardRole = "TENANT" | "LANDLORD" | "ADMIN";
 
 export type DashboardUser = {
+  id?: string;
   name: string;
   role: DashboardRole;
   avatar: string;
@@ -63,6 +64,10 @@ export const requireDashboardUser = async (
   return {
     token,
     user: {
+      id:
+        "id" in userInfo && typeof userInfo.id === "string"
+          ? userInfo.id
+          : undefined,
       name:
         "name" in userInfo && typeof userInfo.name === "string"
           ? userInfo.name

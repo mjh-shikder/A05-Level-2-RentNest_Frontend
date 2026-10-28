@@ -9,10 +9,43 @@ import { getPropertyDetails, PropertyListingsError } from "@/lib/properties";
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const messageFrom = (body: unknown) =>
-  isRecord(body) && typeof body.message === "string"
-    ? body.message.trim()
+const messageFrom = (body: unknown, depth = 0): string => {
+  if (depth > 4) return "";
+  if (typeof body === "string") {
+    const message = body.trim();
+    return message && !message.startsWith("<") ? message.slice(0, 500) : "";
+  }
+  if (Array.isArray(body)) {
+    return body
+      .map((item) => messageFrom(item, depth + 1))
+      .filter(Boolean)
+      .join(" ");
+  }
+  if (!isRecord(body)) return "";
+
+  const constraints = isRecord(body.constraints)
+    ? Object.values(body.constraints)
+        .filter((value): value is string => typeof value === "string")
+        .join(" ")
     : "";
+  if (constraints) return constraints.slice(0, 500);
+
+  for (const key of ["errors", "issues", "details", "message", "error", "data"]) {
+    const message = messageFrom(body[key], depth + 1);
+    if (message) return message;
+  }
+  return "";
+};
+
+const readResponseBody = async (response: Response): Promise<unknown> => {
+  const text = await response.text();
+  if (!text.trim()) return null;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return text;
+  }
+};
 
 const redirectWithNotice = (
   path: string,
@@ -141,6 +174,7 @@ const postDashboardAction = async (
   token: string,
   method: "DELETE" | "PATCH" | "POST" | "PUT",
   body?: Record<string, unknown>,
+  failureMessage = "The request could not be completed.",
 ) => {
   const backendUrl = process.env.BACKEND_URL?.replace(/\/+$/, "");
   if (!backendUrl) {
@@ -157,14 +191,17 @@ const postDashboardAction = async (
       body: body ? JSON.stringify(body) : undefined,
       cache: "no-store",
     });
-    const result: unknown = await response.json().catch(() => null);
+    const result = await readResponseBody(response);
+    const ok = response.ok && !(isRecord(result) && result.success === false);
     return {
-      ok: response.ok,
+      ok,
       message:
         messageFrom(result) ||
-        (response.ok
+        (ok
           ? "Your changes have been saved."
-          : `The request failed with status ${response.status}.`),
+          : `${failureMessage}${
+              response.ok ? "" : ` (HTTP ${response.status}).`
+            }`),
     };
   } catch {
     return {
@@ -308,11 +345,13 @@ const getPropertyFormData = (formData: FormData) => {
   const city = formData.get("city");
   const country = formData.get("country");
   const rent = parseOptionalNumber(formData.get("rent"));
-  const securityDeposit = parseOptionalNumber(
-    formData.get("securityDeposit"),
-  );
+  const securityDeposit = parseOptionalNumber(formData.get("securityDeposit"));
   const availableFrom = formData.get("availableFrom");
-  const status = formData.get("status");
+  const submittedStatus = formData.get("status");
+  const status =
+    typeof submittedStatus === "string"
+      ? submittedStatus.trim().toUpperCase()
+      : "";
   const furnished = formData.get("furnished");
   const description = formData.get("description");
   const images = formData.get("images");
@@ -335,24 +374,32 @@ const getPropertyFormData = (formData: FormData) => {
     rent === null ||
     !Number.isFinite(rent) ||
     rent <= 0 ||
-    !(status === "AVAILABLE" || status === "UNAVAILABLE") ||
-    !(furnished === "true" || furnished === "false") ||
+    !["AVAILABLE", "MAINTENANCE", "RENTED"].includes(status) ||
+    typeof description !== "string" ||
+    !description.trim() ||
     typeof availableFrom !== "string" ||
     !availableFrom.trim()
   ) {
     return {
-      error: "Complete the required property fields with valid values.",
+      error: "Complete all required fields and enter a valid monthly rent.",
     };
+  }
+
+  const optionalNumbers = [securityDeposit, bedrooms, bathrooms, area, floor];
+  if (
+    optionalNumbers.some(
+      (value) => value !== null && (!Number.isFinite(value) || value < 0),
+    ) ||
+    [bedrooms, bathrooms, floor].some(
+      (value) => value !== null && !Number.isInteger(value),
+    )
+  ) {
+    return { error: "Enter valid non-negative values for property details." };
   }
 
   const date = new Date(`${availableFrom}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) {
     return { error: "Enter a valid availability date." };
-  }
-
-  const optionalValues = [securityDeposit, bedrooms, bathrooms, area, floor];
-  if (optionalValues.some((value) => value !== null && !Number.isFinite(value))) {
-    return { error: "Enter valid non-negative property details." };
   }
 
   const imageUrls =
@@ -379,17 +426,14 @@ const getPropertyFormData = (formData: FormData) => {
     payload: {
       title: title.trim(),
       categoryId: categoryId.trim(),
-      description:
-        typeof description === "string" && description.trim()
-          ? description.trim()
-          : undefined,
-      bedrooms: bedrooms ?? undefined,
-      bathrooms: bathrooms ?? undefined,
-      area: area ?? undefined,
-      floor: floor ?? undefined,
+      description: description.trim(),
+      ...(bedrooms !== null ? { bedrooms } : {}),
+      ...(bathrooms !== null ? { bathrooms } : {}),
+      ...(area !== null ? { area } : {}),
+      ...(floor !== null ? { floor } : {}),
       furnished: furnished === "true",
       rent,
-      securityDeposit: securityDeposit ?? undefined,
+      ...(securityDeposit !== null ? { securityDeposit } : {}),
       address: address.trim(),
       city: city.trim(),
       country: country.trim(),
@@ -400,8 +444,43 @@ const getPropertyFormData = (formData: FormData) => {
   };
 };
 
+const getAuthenticatedUserId = async (
+  token: string,
+): Promise<{ id: string } | { error: string }> => {
+  const backendUrl = process.env.BACKEND_URL?.replace(/\/+$/, "");
+  if (!backendUrl) {
+    return { error: "The server API URL is not configured." };
+  }
+
+  try {
+    const response = await fetch(`${backendUrl}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    const result = await readResponseBody(response);
+    const data =
+      isRecord(result) && isRecord(result.data) ? result.data : null;
+    const nestedUser = data && isRecord(data.user) ? data.user : null;
+    const id = data?.id ?? nestedUser?.id;
+
+    if (response.ok && typeof id === "string" && id.trim()) {
+      return { id: id.trim() };
+    }
+
+    return {
+      error:
+        messageFrom(result) ||
+        `Could not identify your account (HTTP ${response.status}). Please sign in again.`,
+    };
+  } catch {
+    return {
+      error: "Could not verify your account. Please try again.",
+    };
+  }
+};
+
 export const savePropertyAction = async (formData: FormData) => {
-  const { token } = await requireDashboardUser("LANDLORD");
+  const { token, user } = await requireDashboardUser("LANDLORD");
   const propertyId = formData.get("propertyId");
   const validPropertyId = typeof propertyId === "string" ? propertyId.trim() : "";
   const isUpdate = Boolean(validPropertyId);
@@ -415,15 +494,29 @@ export const savePropertyAction = async (formData: FormData) => {
     );
   }
 
+  const account = user.id?.trim()
+    ? { id: user.id.trim() }
+    : await getAuthenticatedUserId(token);
+  if ("error" in account) {
+    return redirectWithNotice(
+      "/dashboard/landlord",
+      account.error,
+      "error",
+    );
+  }
+
   const response = await postDashboardAction(
     isUpdate
       ? `/api/landlord/properties/${encodeURIComponent(validPropertyId)}`
       : "/api/landlord/properties",
     token,
     isUpdate ? "PUT" : "POST",
-    result.payload,
+    { ...result.payload, landlordId: account.id },
+    isUpdate
+      ? "Could not update the property."
+      : "Could not create the property.",
   );
-  revalidatePath("/dashboard/landlord");
+  if (response.ok) revalidatePath("/dashboard/landlord");
   redirectWithNotice(
     "/dashboard/landlord",
     response.message,

@@ -8,6 +8,7 @@ All backend requests use `BACKEND_URL`. Authenticated dashboard requests send th
 | `app/(authGroup)/_authComponents/RegisterForm.tsx` | `POST /api/auth/register` | Register a tenant or landlord account. |
 | `components/dashboard/ProfileForm.tsx` via `app/dashboard/actions.ts` | `PATCH /api/user/update` | Update the signed-in user's name, phone, and avatar from any role dashboard. |
 | `app/properties/page.tsx` | `GET /api/all/properties` | Load public property listings. |
+| `components/home/FeatureProperties.tsx` | `GET /api/all/properties` | Show up to three available properties below the home page Hero. |
 | `components/properties/RequestRentalForm.tsx` via `app/dashboard/actions.ts` | `POST /api/rental/create-request` | Submit a tenant rental request from a property detail page. |
 | `app/properties/[id]/page.tsx` | `GET /api/properties/:id` | Load a property's details, owner, and reviews. |
 | `app/dashboard/tenant/page.tsx` | `GET /api/rental/tenants-requests` | Show a tenant's rental request history. |

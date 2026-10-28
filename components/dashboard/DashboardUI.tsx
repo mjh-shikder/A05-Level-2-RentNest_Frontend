@@ -24,6 +24,29 @@ export const DashboardPageHeader = ({
   </header>
 );
 
+export const DashboardLoading = () => (
+  <div
+    aria-label="Loading dashboard"
+    aria-busy="true"
+    className="space-y-7"
+  >
+    <div className="space-y-3">
+      <div className="h-3 w-32 animate-pulse rounded bg-muted" />
+      <div className="h-8 w-64 max-w-full animate-pulse rounded bg-muted" />
+      <div className="h-4 w-80 max-w-full animate-pulse rounded bg-muted" />
+    </div>
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {Array.from({ length: 4 }, (_, index) => (
+        <div
+          key={index}
+          className="h-28 animate-pulse rounded-2xl border border-white/30 bg-white/10 p-5 dark:bg-black/10"
+        />
+      ))}
+    </div>
+    <div className="h-80 animate-pulse rounded-2xl border border-white/30 bg-white/10 dark:bg-black/10" />
+  </div>
+);
+
 export const DashboardStat = ({
   label,
   value,
@@ -149,14 +172,21 @@ export const DashboardNotice = ({
   type?: string;
 }) =>
   message ? (
-    <p
+    <div
       role={type === "error" ? "alert" : "status"}
-      className={`rounded-xl border px-4 py-3 text-sm ${
+      aria-live={type === "error" ? "assertive" : "polite"}
+      className={`flex items-start gap-3 rounded-2xl border p-4 text-sm ${
         type === "error"
-          ? "border-destructive/25 bg-destructive/5 text-destructive"
+          ? "border-destructive/25 bg-destructive/5 text-foreground"
           : "border-primary/20 bg-primary/5 text-foreground"
       }`}
     >
-      {message}
-    </p>
+      {type === "error" && (
+        <AlertCircle
+          aria-hidden="true"
+          className="mt-0.5 size-4 shrink-0 text-destructive"
+        />
+      )}
+      <p>{message}</p>
+    </div>
   ) : null;

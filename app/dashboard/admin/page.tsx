@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import {
   DashboardCell,
   DashboardEmpty,
   DashboardError,
+  DashboardLoading,
   DashboardNotice,
   DashboardPageHeader,
   DashboardPanel,
@@ -23,9 +25,11 @@ import {
   textValue,
 } from "@/lib/dashboard-data";
 
-export default async function AdminDashboard({
+async function AdminDashboardContent({
   searchParams,
-}: PageProps<"/dashboard/admin">) {
+}: {
+  searchParams: PageProps<"/dashboard/admin">["searchParams"];
+}) {
   const { token, user } = await requireDashboardUser("ADMIN");
   const params = await searchParams;
   const [usersResult, propertiesResult, rentalsResult] = await Promise.all([
@@ -248,5 +252,15 @@ export default async function AdminDashboard({
         </DashboardPanel>
       </DashboardSection>
     </div>
+  );
+}
+
+export default function AdminDashboard({
+  searchParams,
+}: PageProps<"/dashboard/admin">) {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <AdminDashboardContent searchParams={searchParams} />
+    </Suspense>
   );
 }

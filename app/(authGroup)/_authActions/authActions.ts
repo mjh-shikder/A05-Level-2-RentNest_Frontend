@@ -106,6 +106,7 @@ export const loginAction = async (_prevState: LoginState, formData: FormData,): 
   cookieStore.set(
     "userInfo",
     JSON.stringify({
+      id: userData.user.id,
       name: userData.user.name,
       role: userData.user.role,
       avatar: userData.user.avatar,
