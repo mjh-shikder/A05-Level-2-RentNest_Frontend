@@ -4,6 +4,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import Navbar from "@/components/shared/Navbar";
+import Footer from "@/components/shared/Footer";
+import RouteAwareFooter from "@/components/shared/RouteAwareFooter";
 import ThemeProvider from "@/components/shared/ThemeProvider";
 import { Suspense } from "react";
 
@@ -35,6 +37,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Navbar />
           </Suspense>
           {children}
+          <Suspense fallback={null}>
+            <RouteAwareFooter>
+              <Footer />
+            </RouteAwareFooter>
+          </Suspense>
           <Toaster position="top-right" richColors />
         </ThemeProvider>
       </body>

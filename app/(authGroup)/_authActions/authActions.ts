@@ -214,10 +214,6 @@ export const registerAction = async (
       };
     }
 
-    return {
-      message: responseMessage || "Registration successful. You can now log in.",
-      success: true,
-      };
   } catch {
     const error = "Could not connect to the server. Please try again.";
     return {
@@ -226,4 +222,6 @@ export const registerAction = async (
       success: false,
     };
   }
+
+  redirect("/login");
 };
