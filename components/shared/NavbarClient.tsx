@@ -17,6 +17,7 @@ export type NavbarUser = {
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/properties", label: "Properties" },
+  { href: "/about", label: "About Us" },
 ];
 
 const dashboardByRole: Record<NavbarUser["role"], string> = {
