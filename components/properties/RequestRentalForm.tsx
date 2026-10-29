@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import {
   createRentalRequestAction,
   type RentalRequestActionState,
 } from "@/app/dashboard/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 const initialState: RentalRequestActionState = {
   status: "idle",
@@ -18,6 +19,12 @@ const RequestRentalForm = ({ propertyId }: { propertyId: string }) => {
     createRentalRequestAction,
     initialState,
   );
+
+  useEffect(() => {
+    if (state.status === "success") {
+      toast.success("Rental request created");
+    } else { toast.error("You have already and active request")}
+  }, [state]);
 
   return (
     <form action={formAction} className="mt-5 space-y-4">

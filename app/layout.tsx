@@ -35,7 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Navbar />
           </Suspense>
           {children}
-          <Toaster position="top-center" richColors />
+          <Toaster position="top-right" richColors />
         </ThemeProvider>
       </body>
     </html>

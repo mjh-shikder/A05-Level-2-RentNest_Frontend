@@ -42,7 +42,7 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <form action={action} className="space-y-5" method="POST">
+    <form action={action} className="space-y-5">
       <div className="space-y-2">
         <label htmlFor="email" className="text-sm font-medium text-white">
           Email

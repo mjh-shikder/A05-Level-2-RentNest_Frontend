@@ -269,7 +269,7 @@ export const createRentalRequestAction = async (
     return { status: "success", message: result.message };
   }
 
-  return { status: "error", message: result.message };
+  return { status: "error", message: "You have already an active request" };
 };
 
 export const updateRentalRequestAction = async (formData: FormData) => {
