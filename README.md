@@ -6,7 +6,7 @@
 
 An online rental platform connecting tenants and landlords, with tools to discover properties, manage rental requests, and track payments.
 
-[Live App](https://rentnest.mjhshikder.com/) · [Backend API](https://a04-level-2.onrender.com) · [Project Walkthrough](https://drive.google.com/file/d/xxx/)
+[Live App](https://rentnest.mjhshikder.com/) · [Backend API](https://a04-level-2.onrender.com) · [Project Walkthrough](https://www.loom.com/share/5c66e15a92dd4d60bc4574e0dfd306dc)
 
 </div>
 
