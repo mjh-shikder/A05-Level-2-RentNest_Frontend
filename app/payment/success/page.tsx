@@ -1,11 +1,7 @@
-import React from 'react';
+import PaymentResult from "@/components/payment/PaymentResult";
 
 const PaymentSuccessPage = () => {
-    return (
-        <div>
-            Payment Success page 
-        </div>
-    );
+  return <PaymentResult status="success" />;
 };
 
 export default PaymentSuccessPage;

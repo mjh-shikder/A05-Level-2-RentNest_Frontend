@@ -1,11 +1,7 @@
-import React from 'react';
+import PaymentResult from "@/components/payment/PaymentResult";
 
 const PaymentCancelPage = () => {
-    return (
-        <div>
-            Payment cancel page
-        </div>
-    );
+  return <PaymentResult status="cancel" />;
 };
 
 export default PaymentCancelPage;

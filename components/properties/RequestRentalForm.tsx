@@ -23,7 +23,9 @@ const RequestRentalForm = ({ propertyId }: { propertyId: string }) => {
   useEffect(() => {
     if (state.status === "success") {
       toast.success("Rental request created");
-    } else { toast.error("You have already and active request")}
+    } else if (state.status === "error"){ 
+      toast.error("You have already and active request")
+    }
   }, [state]);
 
   return (
