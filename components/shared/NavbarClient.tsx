@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -53,12 +53,38 @@ const NavbarClient = ({
 }) => {
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
+  const accountMenuRef = useRef<HTMLDetailsElement>(null);
   const themeReady = useSyncExternalStore(
     subscribeToNothing,
     getClientSnapshot,
     getServerSnapshot,
   );
   const isDark = themeReady && resolvedTheme === "dark";
+
+  useEffect(() => {
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      const menu = accountMenuRef.current;
+      if (menu?.open && event.target instanceof Node && !menu.contains(event.target)) {
+        menu.open = false;
+      }
+    };
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      const menu = accountMenuRef.current;
+      if (event.key === "Escape" && menu?.open) {
+        menu.open = false;
+        menu.querySelector("summary")?.focus();
+      }
+    };
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
 
   // The login and registration screens use full-screen backgrounds and keep
   // their existing focused layout without the site navigation.
@@ -142,7 +168,7 @@ const NavbarClient = ({
           </button>
 
           {isAuthenticated && user ? (
-            <details className="group relative">
+            <details ref={accountMenuRef} className="group relative">
               <summary
                 aria-label="Open account menu"
                 className="flex size-10 cursor-pointer list-none items-center justify-center rounded-full border border-white/30 bg-white/10 text-foreground marker:hidden transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden"
@@ -173,12 +199,24 @@ const NavbarClient = ({
                 </div>
                 <Link
                   href={dashboardByRole[user.role]}
+                  onClick={() => {
+                    if (accountMenuRef.current) {
+                      accountMenuRef.current.open = false;
+                    }
+                  }}
                   className="mt-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors hover:bg-accent"
                 >
                   <UserRound className="size-4" />
                   Dashboard
                 </Link>
-                <form action={logoutAction}>
+                <form
+                  action={logoutAction}
+                  onSubmit={() => {
+                    if (accountMenuRef.current) {
+                      accountMenuRef.current.open = false;
+                    }
+                  }}
+                >
                   <button
                     type="submit"
                     className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-destructive transition-colors hover:bg-destructive/10"

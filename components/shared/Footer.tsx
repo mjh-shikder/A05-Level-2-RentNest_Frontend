@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import Link from "next/link";
+import { io } from "next/cache";
 import {
   ArrowUpRight,
   BriefcaseBusiness,
@@ -15,9 +17,14 @@ const socialLinks = [
   { label: "Facebook", icon: UsersRound },
 ];
 
-const Footer = () => {
+const CopyrightNotice = async () => {
+  await io();
   const year = new Date().getFullYear();
 
+  return <p>© {year} RentNest. All rights reserved.</p>;
+};
+
+const Footer = () => {
   return (
     <footer className="relative mt-auto overflow-hidden border-t border-border/70 bg-muted/20">
       <div
@@ -112,7 +119,9 @@ const Footer = () => {
         </div>
 
         <div className="mt-6 flex flex-col gap-2 border-t border-border/70 pt-5 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>© {year} RentNest. All rights reserved.</p>
+          <Suspense fallback={<p>© RentNest. All rights reserved.</p>}>
+            <CopyrightNotice />
+          </Suspense>
           <p>Made for finding your next place to call home.</p>
         </div>
       </div>

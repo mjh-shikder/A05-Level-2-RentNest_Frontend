@@ -158,7 +158,7 @@ const PropertiesBrowser = ({
             </select>
           </label>
 
-          {/* <label className="space-y-1.5 text-xs font-medium text-muted-foreground">
+          <label className="space-y-1.5 text-xs font-medium text-muted-foreground">
             <span>Property status</span>
             <select
               value={status}
@@ -169,7 +169,7 @@ const PropertiesBrowser = ({
               <option value="AVAILABLE">Available</option>
               <option value="RENTED">Rented</option>
             </select>
-          </label> */}
+          </label>
 
           <label className="space-y-1.5 text-xs font-medium text-muted-foreground">
             <span>Bedrooms</span>

@@ -16,6 +16,7 @@ import {
 } from "@/components/dashboard/DashboardUI";
 import { Button } from "@/components/ui/button";
 import { createCheckoutAction } from "@/app/dashboard/actions";
+import DashboardActionButton from "@/components/dashboard/DashboardActionButton";
 import ReviewForm from "@/components/dashboard/ReviewForm";
 import { requireDashboardUser } from "@/lib/dashboard-auth";
 import {
@@ -145,9 +146,10 @@ async function TenantDashboardContent({
                             name="requestId"
                             value={requestId}
                           />
-                          <Button type="submit" size="sm">
-                            Pay now
-                          </Button>
+                          <DashboardActionButton
+                            label="Pay now"
+                            pendingLabel="Starting checkout..."
+                          />
                         </form>
                       ) : status === "COMPLETED" && property?.id ? (
                         <Link
