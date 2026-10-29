@@ -2,6 +2,7 @@
 import { Suspense } from "react";
 import Hero from "@/components/home/Hero";
 import FeatureProperties from "@/components/home/FeatureProperties";
+import WhyRentNest from "@/components/home/WhyRentNest";
 
 const FeaturedPropertiesFallback = () => (
   <section
@@ -27,6 +28,7 @@ export default function Home() {
       <Suspense fallback={<FeaturedPropertiesFallback />}>
         <FeatureProperties />
       </Suspense>
+      <WhyRentNest />
     </main>
   );
 }
